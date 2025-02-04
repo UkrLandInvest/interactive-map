@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Investment Map of Ukraine</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            height: 100vh;
+        }
+        #map {
+            width: 100%;
+            height: calc(100vh - 60px); /* Убираем белое поле, карта до самого низа */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #0057B7, #FFD700);
+            padding: 5px 10px; /* Уменьшена высота */
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .header .contact, .header .button-container {
+            display: flex;
+            align-items: center;
+        }
+        .header .contact img, .header .button-container img {
+            width: 28px;
+            height: 20px;
+            margin-right: 8px;
+        }
+        .header .title {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 20px; /* Увеличен размер шрифта заголовка */
+        }
+        .header .button-container a {
+            text-decoration: none;
+            background: white;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .header .button-container a:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="contact">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b4/Flag_of_Turkey.svg" alt="Turkey Flag">
+            <span>0532 675 76 47</span>
+        </div>
+        <div class="title">Interactive Investment Map of Ukraine</div>
+        <div class="button-container">
+            <a href="https://invest-ukraine-homes-c8rz0yu.gamma.site/" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Ukraine.svg" alt="Ukraine Flag">
+                <span>Why Invest Now</span>
+            </a>
+        </div>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // List of plots (10 plots)
+        var plots = [
+            {
+                
+                coords: [49.731599, 30.934432],
+                name: "Zelenky Village",
+                price: "$4,000",
+                size: "0.25 ha (2500m2)",
+                distance: "65 km",
+                link: "https://sites.google.com/view/zelenky/zelenky-village-land-details"
+            },
+            {
+                coords: [50.48332, 29.64154],
+                name: "Nezhylovychi Village - Affordable Central Village Plot Steps from a Scenic Lake",
+                price: "$5,500",
+                size: "0.25 ha (2500m2)",
+                distance: "50 km",
+                link: "https://sites.google.com/view/nezhylovychi/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [49.9917147, 29.5734291],
+                name: "Yerchyky Village - Unique Peninsula Land Plot",
+                price: "$10,000",
+                size: "0.17 ha (1700m2)",
+                distance: "104 km",
+                link: "https://sites.google.com/view/dm-1001/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [49.818270, 30.991137],
+                name: "Ocheretiane Village - Land Plot with Scenic Views",
+                price: "$4,500",
+                size: "0.23 ha (2300m2)",
+                distance: "61 km",
+                link: "https://sites.google.com/view/dm-1002/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [49.955210, 29.670018],
+                name: "Stavyshche Village - Waterfront Land Plot with Artificial Pond",
+                price: "$5,000",
+                size: "0.25 ha (2500m2)",
+                distance: "80 km",
+                link: "https://sites.google.com/view/dm-1005/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [50.483384, 29.715970],
+                name: "Nalyvaikivka Village - Small and Affordable Land Plot Near Kyiv",
+                price: "$4,500",
+                size: "0.13 ha (1300m2)",
+                distance: "44 km",
+                link: "https://sites.google.com/view/dm-1006/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [49.872386, 29.305616],
+                name: "Makarivka Village - Spacious Land Plot with House and Farming Potential",
+                price: "$5,000",
+                size: "0.13 ha (1300m2)",
+                distance: "121 km",
+                link: "https://sites.google.com/view/dm-1007/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [50.175413, 29.918489],
+                name: "Dorohoinka Village - Close to Kyiv Lakeside Plot with Potential",
+                price: "$6,000",
+                size: "0.25 ha (2500m2)",
+                distance: "55 km",
+                link: "https://sites.google.com/view/dm-1012?usp=sharing"
+            },
+            {
+                coords: [49.846565, 30.347024],
+                name: "Mala Antonivka Village - Spacious Waterfront Land with Lake Access",
+                price: "$7,500",
+                size: "0.25 ha (2500m2)",
+                distance: "57 km",
+                link: "https://sites.google.com/view/dm-1011?usp=sharing"
+            },
+            {
+                coords: [49.629437, 30.123123],
+                name: "Ozerna Village - Land Plot with House in Livable Condition and Small River Access",
+                price: "$5,500",
+                size: "0.25 ha (2500m2)",
+                distance: "121 km",
+                link: "https://sites.google.com/view/land-in-ukraine/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0"
+            },
+            {
+                coords: [50.164286, 29.698519], // Укажите реальные координаты
+                name: "Velyki Huliaky Village - Spacious Land Plot with a House – 62 km from Kyiv",
+                price: "$7,500",
+                size: "0.25 ha (2500m2)",
+                distance: "62 km",
+                link: "https://sites.google.com/view/velykihuliaki?usp=sharing"
+            }
+            // ... (остальные участки остаются без изменений)
+        ];
+
+        var map = L.map('map');
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibGV2LTIwMjAiLCJhIjoiY202aHNqMmI3MDE1eDJxc2FrdnEyc25uNSJ9.nIZU9zxoLDi0kUDHy01J0Q', {
+            attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1
+        }).addTo(map);
+
+        var bounds = plots.map(plot => plot.coords);
+        map.fitBounds(bounds, { padding: [50, 50] });
+
+        plots.forEach(plot => {
+            L.marker(plot.coords)
+                .addTo(map)
+                .bindPopup(`
+                    <b>${plot.name}</b><br>
+                    Price: ${plot.price}<br>
+                    Size: ${plot.size}<br>
+                    Distance to Kyiv: ${plot.distance}<br>
+                    <a href="#" onclick="window.location.href='${plot.link}'; return false;">More details</a>
+                `);
+        });
+    </script>
+</body>
+</html>
